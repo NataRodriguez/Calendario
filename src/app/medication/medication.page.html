@@ -1,0 +1,36 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button auto-hide="false" menu="main-menu"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Agregar Medicamento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label position="floating">Nombre del remedio</ion-label>
+      <ion-input type="text" [(ngModel)]="medicationName"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Fecha de inicio</ion-label>
+      <ion-input type="date" [(ngModel)]="startDate"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Dosis</ion-label>
+      <ion-input type="text" [(ngModel)]="dosage"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Frecuencia</ion-label>
+      <ion-input type="text" [(ngModel)]="frequency"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Cantidad de días</ion-label>
+      <ion-input type="number" [(ngModel)]="duration"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-button expand="full" (click)="saveMedication()">Guardar</ion-button>
+</ion-content>
+

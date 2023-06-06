@@ -1,0 +1,38 @@
+.calendar-week {
+    display: flex;
+  }
+  
+  .calendar-day {
+    flex: 1;
+    border: 1px solid black;
+    margin: 5px;
+    padding: 10px;
+  }
+  .calendar-head {
+    flex: 1;
+    border-bottom: 1px solid black;
+    margin: 5px;
+    padding: 10px;
+  }
+
+  .event-container {
+    margin-top: 10px;
+  }
+  
+  .event {
+    background-color: #e9e9e9;
+    padding: 10px;
+    margin-bottom: 5px;
+  }
+  
+  .event-time {
+    font-weight: bold;
+  }
+  
+  .event-medication {
+    margin-bottom: 3px;
+  }
+  
+  .event-quantity {
+    font-style: italic;
+  }

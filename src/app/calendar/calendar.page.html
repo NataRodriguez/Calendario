@@ -1,0 +1,32 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button auto-hide="false" menu="main-menu"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Calendario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="auto" *ngFor="let day of calendar">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{ day.date }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div *ngIf="hasEvents(day.date)" class="event-container">
+              <div *ngFor="let event of getEvents(day.date)" class="event">
+                <div class="event-time">{{ event.time }}</div>
+                <div class="event-medication">{{ event.medication }}</div>
+                <div class="event-quantity">{{ event.quantity }}</div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
