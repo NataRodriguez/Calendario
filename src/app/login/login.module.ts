@@ -8,6 +8,11 @@ import { LoginPageRoutingModule } from './login-routing.module';
 
 import { LoginPage } from './login.page';
 
+import { AuthService } from '../auth.service';
+import { HttpClient } from '@angular/common/http';
+import { SQLite } from '@ionic-native/sqlite/ngx';
+
+
 @NgModule({
   imports: [
     CommonModule,
@@ -15,6 +20,8 @@ import { LoginPage } from './login.page';
     IonicModule,
     LoginPageRoutingModule
   ],
-  declarations: [LoginPage]
+  declarations: [LoginPage],
+  providers: [AuthService, HttpClient, SQLite]
 })
+
 export class LoginPageModule {}

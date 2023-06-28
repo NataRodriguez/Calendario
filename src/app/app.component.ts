@@ -21,7 +21,7 @@ export class AppComponent {
   constructor(private menuController: MenuController, private authService: AuthService) {}
 
   ngOnInit() {
-    this.isAuthenticated = this.authService.isAuthenticated();
+    this.isAuthenticated = this.authService.isLoggedIn();
   }
 
   login() {

@@ -22,15 +22,33 @@
       <ion-input type="text" [(ngModel)]="dosage"></ion-input>
     </ion-item>
     <ion-item>
+      <ion-label position="floating">Tipo frecuencia</ion-label>
+      <ion-select [(ngModel)]="frequencyType">
+        <ion-select-option value="horas">Horas</ion-select-option>
+        <ion-select-option value="dias">Días</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
       <ion-label position="floating">Frecuencia</ion-label>
       <ion-input type="text" [(ngModel)]="frequency"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="frequencyType === 'horas'">
+      <ion-label>Minutos</ion-label>
+      <ion-checkbox [(ngModel)]="showMinutes"></ion-checkbox>
+    </ion-item>
+    <ion-item *ngIf="frequencyType === 'horas' && showMinutes">
+      <ion-label position="floating">Minutos</ion-label>
+      <ion-input type="number" [(ngModel)]="minutes"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label position="floating">Cantidad de días</ion-label>
       <ion-input type="number" [(ngModel)]="duration"></ion-input>
     </ion-item>
+    <ion-item>
+      <ion-label position="floating">Hora primera dosis</ion-label>
+      <ion-input type="time" [(ngModel)]="firstDoseTime"></ion-input>
+    </ion-item>
   </ion-list>
 
   <ion-button expand="full" (click)="saveMedication()">Guardar</ion-button>
 </ion-content>
-

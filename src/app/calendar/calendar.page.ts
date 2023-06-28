@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AppComponent } from '../app.component';
 import { MenuController } from '@ionic/angular';
+import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
+import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-calendar',
@@ -15,7 +18,7 @@ export class CalendarPage implements OnInit {
   public calendar: any[] = []; // Array de objetos para almacenar los días del calendario
   public events: any[] = []; // Array de objetos para almacenar los eventos
 
-  constructor(private menuController: MenuController, private appComponent: AppComponent) {
+  constructor(private authService: AuthService, private menuController: MenuController, private appComponent: AppComponent, private sqlite: SQLite, private router: Router) {
     //this.generateCalendar();
   }
 
@@ -24,9 +27,14 @@ export class CalendarPage implements OnInit {
   }
   
   ngOnInit() {
-    this.generateCalendar();
-    this.generateEvents();
-
+    if (!this.authService.isLoggedIn()) {
+      // Redirigir al inicio de sesión si no está autenticado
+      this.router.navigate(['/login']);
+    } else {
+      this.generateCalendar();
+      this.generateEvents();
+      this.createMedicamentosTable();
+    }
   }
 
   hasEvents(date: string): boolean {
@@ -38,55 +46,41 @@ export class CalendarPage implements OnInit {
     // Obtener los eventos asociados a la fecha proporcionada
     return this.events.filter((event) => event.date === date);
   }
-  /*generateMockEvents() {
-    const mockEvents = [
-      { date: '2023-06-05', time: '9:00 AM', medication: 'Remedio 1', quantity: 2 },
-      { date: '2023-06-10', time: '2:00 PM', medication: 'Remedio 2', quantity: 1 },
-      { date: '2023-06-15', time: '10:30 AM', medication: 'Remedio 3', quantity: 3 },
-    ];
   
-    this.events = mockEvents;
+  createMedicamentosTable() {
+    this.sqlite.create({
+      name: 'data.db',
+      location: 'default'
+    })
+    .then((db: SQLiteObject) => {
+      db.executeSql(`
+        CREATE TABLE IF NOT EXISTS medicamentos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nombre_medicamento TEXT,
+          fecha_inicio TEXT,
+          duracion_tratamiento INTEGER,
+          fecha_fin TEXT,
+          dosis INTEGER
+        )
+      `, [])
+      .then(() => console.log('Tabla medicamentos creada correctamente.'))
+      .catch(error => console.error('Error al crear la tabla medicamentos:', error));
+  
+      db.executeSql(`
+        CREATE TABLE IF NOT EXISTS frecuencia_medicamentos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          medicamento_id INTEGER,
+          hora TEXT,
+          FOREIGN KEY (medicamento_id) REFERENCES medicamentos (id)
+        )
+      `, [])
+      .then(() => console.log('Tabla frecuencia_medicamentos creada correctamente.'))
+      .catch(error => console.error('Error al crear la tabla frecuencia_medicamentos:', error));
+    })
+    .catch(error => console.error('Error al abrir la base de datos:', error));
   }
+  
 
-  generateCalendar() {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentDate.getFullYear(), currentMonth + 1, 0).getDate();
-  
-    let currentDay = 1;
-    let week: (number | null)[] = [];
-  
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      week.push(null);
-    }
-  
-    for (let i = firstDayOfMonth; i < 7; i++) {
-      week.push(currentDay);
-      currentDay++;
-    }
-  
-    this.weeks.push(week);
-  
-    while (currentDay <= daysInMonth) {
-      week = [];
-      for (let i = 0; i < 7 && currentDay <= daysInMonth; i++) {
-        week.push(currentDay);
-        currentDay++;
-      }
-      this.weeks.push(week);
-    }
-  
-    // Verificar si la última semana tiene menos de 7 días
-    const lastWeek = this.weeks[this.weeks.length - 1];
-    if (lastWeek.length < 7) {
-      const remainingDays = 7 - lastWeek.length;
-      for (let i = 0; i < remainingDays; i++) {
-        lastWeek.push(null);
-      }
-    }
-  }*/
-  
   generateCalendar() {
     // Generar datos de muestra para el calendario (30 días)
     const startDate = new Date(); // Fecha de inicio (hoy)
@@ -101,6 +95,45 @@ export class CalendarPage implements OnInit {
     }
   }
 
+  generateEvents() {
+    this.sqlite.create({
+      name: 'data.db',
+      location: 'default'
+    })
+    .then((db: SQLiteObject) => {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // Los meses en JavaScript comienzan desde 0, por lo que sumamos 1
+      const currentYear = currentDate.getFullYear();
+      const startDate = `${currentYear}-${currentMonth}-01`;
+      const endDate = `${currentYear}-${currentMonth + 1}-01`;
+  
+      const query = `
+        SELECT m.*, f.hora
+        FROM medicamentos m
+        LEFT JOIN frecuencia_medicamentos f ON m.id = f.medicamento_id
+        WHERE m.fecha_inicio >= '${startDate}' AND m.fecha_inicio < '${endDate}'
+      `;
+  
+      db.executeSql(query, [])
+      .then((result) => {
+        for (let i = 0; i < result.rows.length; i++) {
+          const row = result.rows.item(i);
+          const event = {
+            date: row.fecha_inicio,
+            time: row.hora || '', // Agrega la hora si está disponible en la tabla frecuencia_medicamentos
+            medication: row.nombre_medicamento,
+            quantity: `${row.dosis} comprimidos`, // Agrega la dosis y la unidad correspondiente si están disponibles en la tabla medicamentos
+          };
+          this.events.push(event);
+        }
+      })
+      .catch(error => console.error('Error al obtener los medicamentos:', error));
+    })
+    .catch(error => console.error('Error al abrir la base de datos:', error));
+  }
+  
+  
+/*
   generateEvents() {
     // Generar datos de muestra para los eventos
     const event1 = {
@@ -122,5 +155,5 @@ export class CalendarPage implements OnInit {
       quantity: '3 comprimidos',
     };
     this.events.push(event1, event2, event3);
-  }
+  }*/
 }
